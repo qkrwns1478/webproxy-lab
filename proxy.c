@@ -14,12 +14,14 @@ static const char *version_hdr = "HTTP/1.0\r\n";
 
 void doit(int connfd);
 void parse_uri(char *uri, char *host, char *path, char *port);
+void *thread(void *vargp);
 
 int main(int argc, char **argv) {
-  int listenfd, connfd;
+  int listenfd, *connfdp;
   char hostname[MAXLINE], port[MAXLINE];
   socklen_t clientlen;
   struct sockaddr_storage clientaddr;
+  pthread_t tid;
 
   // Check command-line args
   if (argc != 2) {
@@ -29,12 +31,10 @@ int main(int argc, char **argv) {
 
   listenfd = Open_listenfd(argv[1]);
   while (1) {
-    clientlen = sizeof(clientaddr);
-    connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);
-    Getnameinfo((SA *)&clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
-    printf("Host (%s, %s) accessed to the proxy\n", hostname, port);
-    doit(connfd);
-    Close(connfd);
+    clientlen = sizeof(struct sockaddr_storage);
+    connfdp = Malloc(sizeof(int));
+    *connfdp = Accept(listenfd, (SA *) &clientaddr, &clientlen);
+    Pthread_create(&tid, NULL, thread, connfdp);
   }
 }
 
@@ -109,4 +109,14 @@ void parse_uri(char *uri, char *host, char *path, char *port) {
     strcpy(host, host_start);
     strcpy(path, "/");
   }
+}
+
+// Thread Routine
+void *thread(void *vargp) {
+  int connfd = *((int *)vargp);
+  Pthread_detach(pthread_self());
+  Free(vargp);
+  doit(connfd);
+  Close(connfd);
+  return NULL;
 }
