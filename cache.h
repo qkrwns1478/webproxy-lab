@@ -13,7 +13,7 @@ typedef struct {
     int read_count;                     // Readers-Writer Lock을 위한 읽기 카운트
     pthread_rwlock_t lock;              // Readers-Writer Lock
     int valid;                          // 해당 캐시 항목이 유효한지 여부
-    int timestamp;                      // LRU를 위한 타임스탬프
+    int freq;                           // LFU를 위한 빈도 변수
 } cache_entry_t;
 
 extern cache_entry_t cache[CACHE_ENTRIES];
