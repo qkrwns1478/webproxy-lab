@@ -38,8 +38,7 @@ int main(int argc, char **argv) {
   }
 }
 
-void doit(int fd)
-{
+void doit(int fd) {
   int is_static;
   struct stat sbuf;
   char buf[MAXLINE], method[MAXLINE], uri[MAXLINE], version[MAXLINE];
@@ -85,10 +84,10 @@ void clienterror(int fd, char *cause, char *errnum, char *shortmsg, char *longms
 
   // Build the HTTP response body 
   sprintf(body, "<html><title>Tiny Error</title>");
-  sprintf(body, "%s<body bgcolor=""ffffff"">\r\n",body);
-  sprintf(body, "%s%s: %s\r\n", body, errnum, shortmsg);
-  sprintf(body, "%s<p>%s: %s\r\n", body, longmsg, cause);
-  sprintf(body, "%s<hr><em>The Tiny Web server</em>\r\n", body);
+  sprintf(body + strlen(body), "<body bgcolor=""ffffff"">\r\n");
+  sprintf(body + strlen(body), "<p>%s: %s\r\n", errnum, shortmsg);
+  sprintf(body + strlen(body), "<p>%s: %s\r\n", longmsg, cause);
+  sprintf(body + strlen(body), "<hr><em>The Tiny Web server</em>\r\n");
 
   // Print the HTTP response 
   sprintf(buf, "HTTP/1.0 %s %s\r\n", errnum, shortmsg);
